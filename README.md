@@ -1,5 +1,5 @@
 # Custom-Wildfly-Image
-If you want to directly pull this cusom image:  docker push kmmitul/wildfly_custom:latest
+If you want to pull this cusom image directly:  docker push kmmitul/wildfly_custom:latest
 
 Extension of official Wildfly image with
 
