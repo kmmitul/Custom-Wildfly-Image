@@ -1,4 +1,6 @@
 # Custom-Wildfly-Image
+If you want directly pull this cusom image: docker push kmmitul/wildfly_custom:tagname
+
 Extension of official Wildfly image with
 
 - a management user to access the administration console
