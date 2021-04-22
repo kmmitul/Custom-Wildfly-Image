@@ -15,5 +15,5 @@ docker run --name="MyWildfly" -d \
 -p 8080:8080 -p 9990:9990 \
 -e POSTGRES_CONNECTION=jdbc:postgresql://x.x.x.x:xxxx/mydb \
 -e POSTGRES_USER="db_user" \
--e POSTGRES_PASSWORD=db_pass" \
+-e POSTGRES_PASSWORD="db_pass" \
 kmmitul/wildfly_custom
