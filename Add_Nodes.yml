@@ -1,0 +1,17 @@
+---
+- hosts: Workers
+  become: true
+  become_method: sudo
+  vars_files:
+    - secret.yml
+
+  tasks:
+
+    - name: Add a worker node in the cluster
+      docker_swarm:
+        state: join
+        advertise_addr:  "{{ansible_host}}"
+        join_token: "{{ hostvars.master.token}}"
+        remote_addrs: "{{ hostvars.master.ansible_default_ipv4.address}}"
+ #       remote_addrs: "{{ hostvars.target.ansible_enp0s8.ipv4.address}}"
+

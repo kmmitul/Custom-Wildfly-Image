@@ -1,0 +1,57 @@
+---
+- hosts: Master
+  become: true
+  become_method: sudo
+  vars_files:
+   - secret.yml
+   
+  tasks:  
+
+
+    - name: Create Network for Swirl
+      docker_network:
+       name: swirl_net
+       driver: overlay
+
+    - name: Create Volume for Swirl
+      docker_volume:
+       name: mongo   
+
+    - name: Create MongoDB for Swirl container
+      docker_swarm_service:
+        name:  Mongo_Swirl
+        image: mongo  
+        state: present
+        mounts :
+          - source: mongo
+            target: /data/db
+            type: volume
+        networks:
+          - swirl_net
+
+    - name: Create Swirl container
+      docker_swarm_service:
+        name:  Swirl
+        image: cuigh/swirl   
+        state: present
+        env: 
+           DB_ADDRESS: Mongo_Swirl:27017/swirl
+        constraints:
+          - node.role == manager   
+        mounts :
+          - source: /var/run/docker.sock
+            target: /var/run/docker.sock
+            type: bind
+        networks:
+          - swirl_net    
+        publish :
+          - mode: ingress
+            published_port: 8081   
+            target_port: 8001
+        restart_config:
+           condition: on-failure
+           delay: 5s
+           max_attempts: 3
+           window: 120s
+
+

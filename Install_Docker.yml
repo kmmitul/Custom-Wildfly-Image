@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  vars_files:
+   - secret.yml
+    
+  tasks:
+
+    - name: Install required system packages
+      ansible.builtin.apt: 
+        update_cache: yes
+        name: "{{ item }}" 
+        state: latest        
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'gnupg', 'software-properties-common', 'lsb-release','python3-pip']
+
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+
+    - name: Install Docker
+      ansible.builtin.apt:
+        name: "{{item}}"
+        state: latest
+        update_cache: yes
+      loop:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+
+    - name: Install Docker Module for Python
+      ansible.builtin.pip:
+        name: docker
+    
+
+
+    
+    
+    

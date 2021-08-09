@@ -1,0 +1,87 @@
+---
+- hosts: Master
+  become: true
+  become_method: sudo
+  vars_files:
+   - secret.yml
+   
+  tasks:  
+
+
+    - name: Create Network for Prometheus
+      docker_network:
+       name: prometheus_net
+       driver: overlay
+
+
+    - name: Create Prometheus container
+      docker_swarm_service:
+        name:  Prometheus
+        image: prom/prometheus  
+        state: present
+        mounts :
+          - source: "{{ playbook_dir }}"/prometheus.yml
+            target: /etc/prometheus/prometheus.yml
+            type: bind
+            readonly: yes
+        command:
+          - --config.file=/etc/prometheus/prometheus.yml
+        networks:
+          - prometheus_net
+        publish :
+          - mode: ingress
+            published_port: 9090   
+            target_port: 9090  
+
+    - name: Create cAdvisor container
+      docker_swarm_service:
+        name:  cAdvisor
+        image: gcr.io/cadvisor/cadvisor:v0.40.0  
+        state: present
+        mode: global
+        mounts :
+          - source: /var/run/docker.sock
+            target: /var/run/docker.sock
+            type: bind
+            readonly: yes
+          - source: /
+            target: /rootfs
+            type: bind
+            readonly: yes
+          - source: /sys
+            target: /sys
+            type: bind
+            readonly: yes  
+          - source: /var/lib/docker
+            target: /var/lib/docker
+            type: bind
+            readonly: yes
+          - source: /var/run
+            target: /var/run
+            type: bind                                      
+        command:
+          - docker_only
+        networks:
+          - prometheus_net
+        publish :
+          - mode: host
+            published_port: 8080   
+            target_port: 8080 
+
+    - name: Create Redis container
+      docker_swarm_service:
+        name:  Redis
+        image: redis  
+        state: present
+        networks:
+          - prometheus_net
+        publish :
+          - mode: ingress
+            published_port: 6379   
+            target_port: 6379  
+
+
+
+
+
+

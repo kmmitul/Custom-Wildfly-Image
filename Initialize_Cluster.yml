@@ -1,0 +1,23 @@
+---
+- hosts: Master
+  become: true
+  become_method: sudo
+  vars_files:
+    - secret.yml
+
+  tasks:
+    - name: Initialize a new swarm with default parameters
+      docker_swarm:
+       state: present  
+       advertise_addr:  "{{ansible_host}}"
+
+    - name: Get the Manager join-token
+      shell: docker swarm join-token --quiet manager
+      register: manager_token
+      
+    - name: Get the worker join-token
+      shell: docker swarm join-token --quiet worker
+      register: worker_token
+  
+    - name: Save the token as fact
+      set_fact: token="{{ worker_token.stdout }}"
